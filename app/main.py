@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import traceback
+from datetime import datetime
 from typing import Any
 
 import numpy as np
@@ -13,18 +14,31 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from .loop_auth import LoopAuth
+
 load_dotenv()
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+today = datetime.now().strftime("%Y-%m-%d")
+LOG_FILE = os.path.join(LOG_DIR, f"{today}.log")
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(),  # console too
+    ],
 )
+
 logger = logging.getLogger("loop-risk")
 
-
 app = FastAPI(title="LOOP Risk API")
+loop_auth = LoopAuth()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 app.mount(
     "/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static"
@@ -281,7 +295,7 @@ async def score(
         pd_val = score_proba(df)
         prob = max(0.0, min(1.0, float(pd_val)))  # clamp 0–1
         band = "Low" if prob < 0.30 else ("Medium" if prob < 0.70 else "High")
-        reasons.append("Scored via model.pkl")
+        reasons.append(f"Scored via {os.path.basename(MODEL_PATH)} (v{MODEL_VERSION})")
 
     except Exception as e:
         # Graceful fallback with detailed logging
@@ -378,6 +392,19 @@ async def debug_model():
         "type": str(type(MODEL)) if MODEL is not None else None,
         "expected_features": expected_feature_names(),
     }
+
+
+@app.get("/loop/token")
+async def loop_token_probe():
+    try:
+        header = loop_auth.get_token()
+        # redact most of it in logs and response
+        redacted = header.split(" ", 1)[1]
+        shown = redacted[:10] + "..." if len(redacted) > 10 else "..."
+        return {"ok": True, "token_preview": shown}
+    except Exception as e:
+        logger.exception("LOOP token probe failed")
+        return {"ok": False, "error": str(e)}
 
 
 @app.get("/health")
