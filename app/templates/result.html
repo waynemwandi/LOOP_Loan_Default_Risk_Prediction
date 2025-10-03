@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Risk Result</h5>
+        <p class="mb-1">
+          <strong>Probability of Default:</strong> {{ (result.probability * 100)
+          | round(1) }}%
+        </p>
+        <p class="mb-3">
+          <strong>Band:</strong>
+          <span
+            class="badge {% if result.band == 'High' %}bg-danger{% elif result.band == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}"
+          >
+            {{ result.band }}
+          </span>
+        </p>
+        <h6>Top reasons</h6>
+        <ul class="mb-3">
+          {% for r in result.reasons %}
+          <li>{{ r }}</li>
+          {% endfor %}
+        </ul>
+
+        <details>
+          <summary class="mb-2">Inputs (echo)</summary>
+          <pre class="bg-light p-3 rounded">
+{{ result.inputs | tojson(indent=2) }}</pre
+          >
+        </details>
+
+        <a class="btn btn-outline-secondary" href="/">Score another</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

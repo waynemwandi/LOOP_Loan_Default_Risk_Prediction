@@ -1,0 +1,110 @@
+{% extends "base.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Score Customer Risk</h5>
+
+        <ul class="nav nav-tabs" id="modeTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="existing-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#existing"
+              type="button"
+              role="tab"
+            >
+              Existing Customer (via LOOP)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="new-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#new-applicant"
+              type="button"
+              role="tab"
+            >
+              New Applicant (manual)
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-3">
+          <!-- Existing customer -->
+          <div
+            class="tab-pane fade show active"
+            id="existing"
+            role="tabpanel"
+            aria-labelledby="existing-tab"
+          >
+            <form method="post" action="/score" class="row g-3">
+              <div class="col-md-6">
+                <label for="customer_id" class="form-label">Customer ID</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="customer_id"
+                  name="customer_id"
+                  placeholder="e.g. 12345678"
+                  required
+                />
+                <div class="form-text">
+                  We’ll fetch attributes from LOOP when APIs are ready.
+                </div>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary" type="submit">Score</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- New applicant -->
+          <div
+            class="tab-pane fade"
+            id="new-applicant"
+            role="tabpanel"
+            aria-labelledby="new-tab"
+          >
+            <form method="post" action="/score" class="row g-3">
+              <div class="col-md-4">
+                <label for="age" class="form-label">Age</label>
+                <input
+                  type="number"
+                  min="18"
+                  max="99"
+                  class="form-control"
+                  id="age"
+                  name="age"
+                  placeholder="e.g. 30"
+                  required
+                />
+              </div>
+              <div class="col-md-8">
+                <label for="income" class="form-label"
+                  >Monthly Income (KES)</label
+                >
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  id="income"
+                  name="income"
+                  placeholder="e.g. 75000"
+                  required
+                />
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
