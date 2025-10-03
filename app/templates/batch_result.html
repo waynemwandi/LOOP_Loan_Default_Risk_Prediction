@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Batch Scoring Result</h5>
+        <p class="mb-2"><strong>File:</strong> {{ summary.filename }}</p>
+        <p class="mb-2"><strong>Total rows:</strong> {{ summary.rows }}</p>
+        <p class="mb-3">
+          <strong>Columns:</strong> {{ summary.columns | join(', ') }}
+        </p>
+
+        <h6 class="mt-3">Preview (first 10 rows)</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Band</th>
+                <th>PD (%)</th>
+                <th>Reasons</th>
+                <th>Inputs (JSON)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in preview %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                  <span
+                    class="badge {% if row.band == 'High' %}bg-danger{% elif row.band == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}"
+                  >
+                    {{ row.band }}
+                  </span>
+                </td>
+                <td>{{ (row.probability * 100) | round(1) }}</td>
+                <td>{{ row.reasons | join('; ') }}</td>
+                <td>
+                  <pre class="mb-0">{{ row.inputs | tojson(indent=0) }}</pre>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <a class="btn btn-outline-secondary" href="/">Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

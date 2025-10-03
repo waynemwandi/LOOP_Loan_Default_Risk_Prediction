@@ -30,6 +30,18 @@
               New Applicant (manual)
             </button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="batch-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#batch"
+              type="button"
+              role="tab"
+            >
+              Batch CSV
+            </button>
+          </li>
         </ul>
 
         <div class="tab-content pt-3">
@@ -51,9 +63,6 @@
                   placeholder="e.g. 12345678"
                   required
                 />
-                <div class="form-text">
-                  We’ll fetch attributes from LOOP when APIs are ready.
-                </div>
               </div>
               <div class="col-12">
                 <button class="btn btn-primary" type="submit">Score</button>
@@ -69,7 +78,8 @@
             aria-labelledby="new-tab"
           >
             <form method="post" action="/score" class="row g-3">
-              <div class="col-md-4">
+              <!-- New applicant form fields -->
+              <div class="col-md-6">
                 <label for="age" class="form-label">Age</label>
                 <input
                   type="number"
@@ -78,27 +88,152 @@
                   class="form-control"
                   id="age"
                   name="age"
-                  placeholder="e.g. 30"
                   required
                 />
               </div>
-              <div class="col-md-8">
-                <label for="income" class="form-label"
-                  >Monthly Income (KES)</label
+              <div class="col-md-6">
+                <label for="credit_score" class="form-label"
+                  >Credit Score</label
                 >
                 <input
                   type="number"
-                  min="0"
-                  step="0.01"
                   class="form-control"
-                  id="income"
-                  name="income"
-                  placeholder="e.g. 75000"
+                  id="credit_score"
+                  name="credit_score"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="no_default_loan" class="form-label"
+                  >Number of Default-Free Loans</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="no_default_loan"
+                  name="no_default_loan"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="net_income" class="form-label">Net Income</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-control"
+                  id="net_income"
+                  name="net_income"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="principal_disbursed" class="form-label"
+                  >Principal Amount</label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-control"
+                  id="principal_disbursed"
+                  name="principal_disbursed"
+                  required
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="emi" class="form-label">EMI</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-control"
+                  id="emi"
+                  name="emi"
+                  required
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" id="gender" name="gender" required>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="marital_status" class="form-label"
+                  >Marital Status</label
+                >
+                <select
+                  class="form-select"
+                  id="marital_status"
+                  name="marital_status"
+                  required
+                >
+                  <option value="SINGLE">Single</option>
+                  <option value="MARRIED">Married</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="product" class="form-label">Product</label>
+                <select
+                  class="form-select"
+                  id="product"
+                  name="product"
+                  required
+                >
+                  <option value="PERSONAL UNSECURED SCHEME LOAN">
+                    Personal Unsecured Scheme Loan
+                  </option>
+                  <option value="INDIVIDUAL IPF">Individual IPF</option>
+                  <option value="MOBILE LOAN">Mobile Loan</option>
+                  <option value="COMMERCIAL VEHICLES">
+                    Commercial Vehicles
+                  </option>
+                  <option value="DIGITAL PERSONAL LOAN">
+                    Digital Personal Loan
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Batch CSV -->
+          <div
+            class="tab-pane fade"
+            id="batch"
+            role="tabpanel"
+            aria-labelledby="batch-tab"
+          >
+            <form
+              method="post"
+              action="/score-csv"
+              enctype="multipart/form-data"
+              class="row g-3"
+            >
+              <div class="col-12">
+                <label for="csv_file" class="form-label">Upload CSV</label>
+                <input
+                  class="form-control"
+                  type="file"
+                  id="csv_file"
+                  name="file"
+                  accept=".csv"
                   required
                 />
               </div>
               <div class="col-12">
-                <button class="btn btn-primary" type="submit">Submit</button>
+                <button class="btn btn-primary" type="submit">
+                  Upload &amp; Score
+                </button>
               </div>
             </form>
           </div>
