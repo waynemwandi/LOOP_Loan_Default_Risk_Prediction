@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .loop_auth import LoopAuth
+from .loop_payout import LoopPayout
 
 load_dotenv()
 
@@ -38,6 +39,7 @@ logger = logging.getLogger("loop-risk")
 
 app = FastAPI(title="LOOP Risk API")
 loop_auth = LoopAuth()
+loop_pay = LoopPayout(loop_auth)
 
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 app.mount(
@@ -192,6 +194,7 @@ async def score(
     gender: str | None = Form(None),
     marital_status: str | None = Form(None),
     product: str | None = Form(None),
+    phone: str | None = Form(None),
 ):
     # --- Existing-customer path (stub) ---
     if customer_id:
@@ -297,6 +300,56 @@ async def score(
         band = "Low" if prob < 0.30 else ("Medium" if prob < 0.70 else "High")
         reasons.append(f"Scored via {os.path.basename(MODEL_PATH)} (v{MODEL_VERSION})")
 
+        # --- Auto-approve and pay for Low risk ---
+        transfer = None
+        if (
+            band == "Low"
+            and phone
+            and principal_disbursed
+            and float(principal_disbursed) > 0
+        ):
+            try:
+                loop_pay.get_user_detail(phone)  # optional
+
+                resp = loop_pay.funds_transfer(
+                    amount=float(principal_disbursed),
+                    recipient_mobile=phone,
+                    recipient_account_type="MOMO",
+                    recipient_bank_code=None,  # env default
+                    recipient_name=None,
+                    narration=f"Loan disbursement to {phone}",
+                )
+
+                # Normalize for the template (result.transfer.*)
+                def _ok(r: dict) -> bool:
+                    code = (str(r.get("responseCode") or "")).strip()
+                    status = (r.get("status") or "").upper().strip()
+                    return status in {"SUCCESS", "OK"} or code in {"00", "000"}
+
+                transfer = {
+                    "ok": _ok(resp),
+                    "status": resp.get("status")
+                    or resp.get("responseDescription")
+                    or resp.get("message"),
+                    "amount": float(principal_disbursed),
+                    # Your template checks these keys in this order; make sure one is present
+                    "transferRefNo": resp.get("transferRefNo")
+                    or resp.get("transactionReferenceNo")
+                    or resp.get("requestId"),
+                    "transactionReferenceNo": resp.get("transactionReferenceNo"),
+                    "requestId": resp.get("requestId"),
+                    "transferType": resp.get("transferType") or "20",
+                    "transferChannel": resp.get("transferChannel") or "65",
+                    "dry_run": bool(os.getenv("DRY_RUN", "").lower() == "true"),
+                }
+
+                logger.info("Normalized transfer for template: %s", transfer)
+                reasons.append("Auto-approved and queued payout (PesaLink-mobile)")
+
+            except Exception as pay_err:
+                logger.exception("Payout failed")
+                reasons.append(f"Payout error: {type(pay_err).__name__}")
+
     except Exception as e:
         # Graceful fallback with detailed logging
         tb = traceback.format_exc()
@@ -327,8 +380,11 @@ async def score(
             "gender": gender,
             "marital_status": marital_status,
             "product": product,
+            "phone": phone,
         },
+        "transfer": transfer,
     }
+
     return templates.TemplateResponse(
         "result.html",
         {"request": request, "result": result, "model_version": MODEL_VERSION},

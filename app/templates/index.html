@@ -1,33 +1,25 @@
 {% extends "base.html" %} {% block content %}
 <div class="row justify-content-center">
-  <div class="col-lg-8">
+  <div class="col-lg-9">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h5 class="card-title mb-3">Score Customer Risk</h5>
+        <div class="d-flex justify-content-center align-items-center mb-3">
+          <i class="fas fa-chart-line fa-2x text-primary me-2"></i>
+          <h4 class="card-title mb-0">Loan Default Risk Prediction</h4>
+        </div>
 
-        <ul class="nav nav-tabs" id="modeTabs" role="tablist">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs card-header-tabs" id="modeTabs" role="tablist">
           <li class="nav-item" role="presentation">
             <button
               class="nav-link active"
-              id="existing-tab"
+              id="single-tab"
               data-bs-toggle="tab"
-              data-bs-target="#existing"
+              data-bs-target="#single"
               type="button"
               role="tab"
             >
-              Existing Customer (via LOOP)
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-              class="nav-link"
-              id="new-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#new-applicant"
-              type="button"
-              role="tab"
-            >
-              New Applicant (manual)
+              <i class="fas fa-user-check me-2"></i>Single Prediction
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -39,48 +31,41 @@
               type="button"
               role="tab"
             >
-              Batch CSV
+              <i class="fas fa-users me-2"></i>Batch Prediction
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="impact-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#impact"
+              type="button"
+              role="tab"
+            >
+              <i class="fas fa-chart-bar me-2"></i>Business Impact
             </button>
           </li>
         </ul>
 
         <div class="tab-content pt-3">
-          <!-- Existing customer -->
+          <!-- Single Prediction -->
           <div
             class="tab-pane fade show active"
-            id="existing"
+            id="single"
             role="tabpanel"
-            aria-labelledby="existing-tab"
+            aria-labelledby="single-tab"
           >
             <form method="post" action="/score" class="row g-3">
               <div class="col-md-6">
-                <label for="customer_id" class="form-label">Customer ID</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="customer_id"
-                  name="customer_id"
-                  placeholder="e.g. 12345678"
-                  required
-                />
-              </div>
-              <div class="col-12">
-                <button class="btn btn-primary" type="submit">Score</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- New applicant -->
-          <div
-            class="tab-pane fade"
-            id="new-applicant"
-            role="tabpanel"
-            aria-labelledby="new-tab"
-          >
-            <form method="post" action="/score" class="row g-3">
-              <!-- New applicant form fields -->
-              <div class="col-md-6">
-                <label for="age" class="form-label">Age</label>
+                <label for="age" class="form-label">
+                  Age
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Applicant's age in years"
+                  ></i>
+                </label>
                 <input
                   type="number"
                   min="18"
@@ -91,10 +76,16 @@
                   required
                 />
               </div>
+
               <div class="col-md-6">
-                <label for="credit_score" class="form-label"
-                  >Credit Score</label
-                >
+                <label for="credit_score" class="form-label">
+                  Credit Score
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Higher is better (e.g. 300–850)"
+                  ></i>
+                </label>
                 <input
                   type="number"
                   class="form-control"
@@ -105,9 +96,14 @@
               </div>
 
               <div class="col-md-6">
-                <label for="no_default_loan" class="form-label"
-                  >Number of Default-Free Loans</label
-                >
+                <label for="no_default_loan" class="form-label">
+                  Number of Default-Free Loans
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Loans repaid without default"
+                  ></i>
+                </label>
                 <input
                   type="number"
                   class="form-control"
@@ -116,45 +112,103 @@
                   required
                 />
               </div>
+
               <div class="col-md-6">
-                <label for="net_income" class="form-label">Net Income</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  id="net_income"
-                  name="net_income"
-                  required
-                />
+                <label for="net_income" class="form-label">
+                  Net Monthly Income
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="In KES"
+                  ></i>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">KSh</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control"
+                    id="net_income"
+                    name="net_income"
+                    required
+                  />
+                </div>
               </div>
 
               <div class="col-md-6">
-                <label for="principal_disbursed" class="form-label"
-                  >Principal Amount</label
-                >
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  id="principal_disbursed"
-                  name="principal_disbursed"
-                  required
-                />
+                <label for="principal_disbursed" class="form-label">
+                  Principal Amount
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Requested loan amount (KES)"
+                  ></i>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">KSh</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control"
+                    id="principal_disbursed"
+                    name="principal_disbursed"
+                    required
+                  />
+                </div>
               </div>
+
               <div class="col-md-6">
-                <label for="emi" class="form-label">EMI</label>
+                <label for="emi" class="form-label">
+                  EMI
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Equated Monthly Instalment (KES)"
+                  ></i>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">KSh</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control"
+                    id="emi"
+                    name="emi"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="phone" class="form-label">
+                  Phone (MSISDN)
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="Format: 2547XXXXXXXX"
+                  ></i>
+                </label>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="tel"
                   class="form-control"
-                  id="emi"
-                  name="emi"
+                  id="phone"
+                  name="phone"
+                  placeholder="2547XXXXXXXX"
+                  inputmode="numeric"
+                  pattern="^2547\d{8}$"
+                  maxlength="12"
+                  aria-describedby="phoneHelp"
                   required
                 />
+                <div id="phoneHelp" class="form-text">
+                  Kenya MSISDN, 12 digits
+                </div>
               </div>
+
+              <div class="col-md-6 d-none d-md-block"></div>
 
               <div class="col-md-4">
                 <label for="gender" class="form-label">Gender</label>
@@ -163,6 +217,7 @@
                   <option value="FEMALE">Female</option>
                 </select>
               </div>
+
               <div class="col-md-4">
                 <label for="marital_status" class="form-label"
                   >Marital Status</label
@@ -178,6 +233,7 @@
                   <option value="OTHER">Other</option>
                 </select>
               </div>
+
               <div class="col-md-4">
                 <label for="product" class="form-label">Product</label>
                 <select
@@ -200,13 +256,15 @@
                 </select>
               </div>
 
-              <div class="col-12">
-                <button class="btn btn-primary" type="submit">Submit</button>
+              <div class="col-12 text-center mt-2">
+                <button class="btn btn-primary px-4" type="submit">
+                  <i class="fas fa-calculator me-2"></i>Predict Default Risk
+                </button>
               </div>
             </form>
           </div>
 
-          <!-- Batch CSV -->
+          <!-- Batch Prediction -->
           <div
             class="tab-pane fade"
             id="batch"
@@ -220,7 +278,14 @@
               class="row g-3"
             >
               <div class="col-12">
-                <label for="csv_file" class="form-label">Upload CSV</label>
+                <label for="csv_file" class="form-label">
+                  Upload CSV
+                  <i
+                    class="fas fa-info-circle text-muted"
+                    data-bs-toggle="tooltip"
+                    title="CSV with required columns"
+                  ></i>
+                </label>
                 <input
                   class="form-control"
                   type="file"
@@ -229,17 +294,199 @@
                   accept=".csv"
                   required
                 />
+                <div class="form-text">
+                  Columns: AGE,CREDIT_SCORE,NO_DEFAULT_LOAN,NET
+                  INCOME,PRINCIPAL_DISBURSED,EMI,GENDER,MARITAL_STATUS,PRODUCT
+                </div>
               </div>
-              <div class="col-12">
-                <button class="btn btn-primary" type="submit">
-                  Upload &amp; Score
+              <div class="col-12 text-center">
+                <button class="btn btn-primary px-4" type="submit">
+                  <i class="fas fa-cloud-upload-alt me-2"></i>Run Batch
+                  Prediction
                 </button>
               </div>
             </form>
           </div>
+
+          <!-- Business Impact -->
+          <div
+            class="tab-pane fade"
+            id="impact"
+            role="tabpanel"
+            aria-labelledby="impact-tab"
+          >
+            <div class="row g-3">
+              <!-- Left: Policy -->
+              <div class="col-md-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-shield-check me-2 text-success"></i>
+                      <h6 class="mb-0">Approval Policy</h6>
+                    </div>
+                    <p class="mb-2 text-muted small">
+                      Simulate portfolio impact by adjusting approval
+                      thresholds.
+                    </p>
+                    <form class="row g-2">
+                      <div class="col-12">
+                        <label class="form-label"
+                          >Auto-approve if PD &lt;</label
+                        >
+                        <div class="input-group">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="1"
+                            value="30"
+                            class="form-control"
+                            id="pd_threshold"
+                          />
+                          <span class="input-group-text">%</span>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary w-100"
+                          disabled
+                        >
+                          <i class="fas fa-sliders-h me-2"></i>Simulate (coming
+                          soon)
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Placeholder metrics -->
+              <div class="col-md-8">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-chart-pie me-2 text-primary"></i>
+                      <h6 class="mb-0">Projected Metrics</h6>
+                    </div>
+                    <div class="row text-center">
+                      <div class="col-4">
+                        <div class="h5 mb-0">—</div>
+                        <div class="text-muted small">Approval Rate</div>
+                      </div>
+                      <div class="col-4">
+                        <div class="h5 mb-0">—</div>
+                        <div class="text-muted small">Expected Loss</div>
+                      </div>
+                      <div class="col-4">
+                        <div class="h5 mb-0">—</div>
+                        <div class="text-muted small">ROA Impact</div>
+                      </div>
+                    </div>
+                    <div class="mt-3 text-muted small">
+                      Upload a batch on the “Batch Prediction” tab to power
+                      these estimates.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NEW: Static Business Impact Assessment -->
+            <div class="row g-3 mt-2">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-clipboard-check me-2 text-info"></i>
+                      <h6 class="mb-0">Business Impact Assessment</h6>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="fw-semibold">Total loans evaluated</div>
+                        <div class="text-muted">6,104</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">
+                          Defaults correctly identified
+                        </div>
+                        <div class="text-muted">2,991</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">
+                          Non-defaults incorrectly flagged
+                        </div>
+                        <div class="text-muted">215</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">Defaults missed</div>
+                        <div class="text-muted">61</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial Impact (static) -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-sack-dollar me-2 text-warning"></i>
+                      <h6 class="mb-0">Financial Impact</h6>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="fw-semibold">Default losses prevented</div>
+                        <div class="text-success">KSh 149,550,000.00</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">Cost of false alarms</div>
+                        <div class="text-danger">KSh 1,075,000.00</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">
+                          Revenue from risk detection
+                        </div>
+                        <div class="text-primary">KSh 5,982,000.00</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="fw-semibold">Net business value</div>
+                        <div class="text-success fw-bold">
+                          KSh 154,457,000.00
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-2 small text-muted">
+                      *Static demo values for presentation. Hook to batch
+                      outputs later to compute these dynamically.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /Business Impact -->
         </div>
       </div>
     </div>
+
+    <div class="text-center mt-3 mb-4">
+      <small class="text-muted"
+        >© 2025 Loan Default Predictor | Powered by XGBoost</small
+      >
+    </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var t = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    t.forEach(function (el) {
+      new bootstrap.Tooltip(el);
+    });
+  });
+</script>
 {% endblock %}

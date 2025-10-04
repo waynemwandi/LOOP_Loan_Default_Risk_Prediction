@@ -16,12 +16,54 @@
             {{ result.band }}
           </span>
         </p>
-        <h6>Top reasons</h6>
+        <h6>Output</h6>
         <ul class="mb-3">
           {% for r in result.reasons %}
           <li>{{ r }}</li>
           {% endfor %}
         </ul>
+
+        {% if result.transfer %}
+        <div
+          class="alert {{ 'alert-success' if result.transfer.ok else 'alert-info' }} mt-3"
+        >
+          <h6 class="mb-1">Payout</h6>
+
+          {% if result.transfer.dry_run %}
+          <div>Mode: <strong>Dry Run</strong></div>
+          {% endif %}
+
+          <div>
+            Status:
+            <span
+              class="badge {{ 'bg-success' if result.transfer.ok else 'bg-secondary' }}"
+            >
+              {{ result.transfer.status or ('OK' if result.transfer.ok else
+              'Queued/Unknown') }}
+            </span>
+          </div>
+
+          <div>
+            Reference:
+            <code>
+              {{ result.transfer.transferRefNo or
+              result.transfer.transactionReferenceNo or
+              result.transfer.requestId or result.transfer.transferRef or 'N/A'
+              }}
+            </code>
+          </div>
+
+          <div>
+            Amount:
+            <strong>
+              {{ (result.transfer.amount or result.inputs.principal_disbursed) |
+              float | round(2) }}
+            </strong>
+          </div>
+
+          <div>Recipient: <strong>{{ result.inputs.phone }}</strong></div>
+        </div>
+        {% endif %}
 
         <details>
           <summary class="mb-2">Inputs (echo)</summary>
